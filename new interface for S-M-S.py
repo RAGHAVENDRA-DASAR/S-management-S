@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
-from tkcalendar import DateEntry  # Assuming you have installed tkcalendar
+from tkinter import ttk/
+from tkcalendar import D/ateEntry  # Assuming you have installed tkcalendar    08/02/2024
 
 class StudentManagementSystem:
     def __init__(self, root):
