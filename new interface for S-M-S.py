@@ -1,16 +1,100 @@
 import tkinter as tk
 import datetime
-import os,openpyxl
-import pandas as pd
+import os
+from openpyxl import Workbook
+from openpyxl import load_workbook
 import shutil
 import sqlite3
 from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox,filedialog
 from tkcalendar import DateEntry
 from openpyxl import Workbook
 
-#this is code for date format error in sql in furture.
+class LoginPanel:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Login Panel")
+        # Determine the screen width and height
+        screen_width = master.winfo_screenwidth()
+        screen_height = master.winfo_screenheight()
 
+        # Set the main window geometry to fit the screen
+        master.geometry(f"{screen_width}x{screen_height}")
+        
+        self.master.configure(background="#f1f1f1")  # Set background color to a white
+        
+        self.label_title = tk.Label(master, text="Welcome to Login Panel", font=("Arial Rounded MT Bold", 24), bg="#f1f1f1", fg="#333333") #font colur to balck
+        self.label_title.pack(pady=40)
+        
+        # Username entry with placeholder text
+        self.entry_username = tk.Entry(master, font=("Arial Rounded MT Bold", 16), bg="white", fg="#202124", relief=tk.FLAT ,width=30 ,bd=2)
+        self.entry_username.insert(0, "Username")
+        self.entry_username.bind("<FocusIn>", lambda event: self.on_entry_click(self.entry_username, "Username"))
+        self.entry_username.bind("<FocusOut>", lambda event: self.on_focusout(self.entry_username, "Username"))
+        self.entry_username.pack(pady=5)
+
+        # Password entry with placeholder text
+        self.entry_password = tk.Entry(master, show="*", font=("Arial Rounded MT Bold", 16), bg="white", fg="#202124", relief=tk.FLAT ,width=30 ,bd=2)
+        self.entry_password.insert(0, "Password")
+        self.entry_password.bind("<FocusIn>", lambda event: self.on_entry_click(self.entry_password, "Password"))
+        self.entry_password.bind("<FocusOut>", lambda event: self.on_focusout(self.entry_password, "Password"))
+        self.entry_password.pack(pady=15)
+
+
+        # Bind Enter key to move focus to the next entry field
+        self.entry_username.bind("<Return>", lambda event: self.entry_password.focus_set())
+        self.entry_password.bind("<Return>", lambda event: self.login())
+
+        # Frame to contain buttons
+        self.button_frame = tk.Frame(master, bg="#f1f1f1")
+        self.button_frame.pack(pady=20)
+
+        # Login button
+        self.btn_login = tk.Button(self.button_frame, text="Login", font=("Arial Rounded MT Bold", 12), bg="#1a73e8", fg="white", command=self.login)
+        self.btn_login.pack(side=tk.LEFT, padx=5, ipadx=20, ipady=10)
+
+        # Cancel button
+        self.btn_cancel = tk.Button(self.button_frame, text="Cancel", font=("Arial Rounded MT Bold", 12), bg="#dc3545", fg="white", command=self.cancel)
+        self.btn_cancel.pack(side=tk.LEFT, padx=5, ipadx=20, ipady=10)
+
+    def login(self):
+        # Hardcoded credentials for demonstration
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+
+        # Replace with your actual login authentication mechanism
+        if username == "admin" and password == "password" :
+            messagebox.showinfo("Login Successful", "Welcome, " + username + "!")
+            self.master.destroy()  # Close the login panel window
+            self.open_main_app()
+        elif username == "" or password == "" :
+            messagebox.showerror("Input Error","Please Enter Username and Password ! ")
+
+        else:
+            messagebox.showerror("Login Failed", "Invalid username or password")
+            self.entry_password.delete(0,"end")
+
+    def cancel(self):
+        self.master.destroy()
+
+    def on_entry_click(self, entry, placeholder):
+        """Function to handle placeholder text when entry field is clicked"""
+        if entry.get() == placeholder:
+            entry.delete(0, "end")  # Delete placeholder text
+            entry.config(fg="#202124")  # Change text color to black
+
+    def on_focusout(self, entry, placeholder):
+        """Function to handle placeholder text when entry field loses focus"""
+        if entry.get() == "":
+            entry.insert(0, placeholder)  # Insert placeholder text
+            entry.config(fg="#5f6368")  # Change text color to gray
+
+    def open_main_app(self):
+        root = tk.Tk()
+        app = StudentManagementSystem(root)
+        root.mainloop()
+
+#this is code for date format error in sql in furture.
 # Define a custom adapter function for datetime.date objects
 def adapt_date(date):
     return date.isoformat()
@@ -23,6 +107,13 @@ class StudentManagementSystem:
     def __init__(self, root):
         self.root = root
         self.root.title("Student Management System")
+        
+        # Determine the screen width and height
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+
+        # Set the main window geometry to fit the screen
+        root.geometry(f"{screen_width}x{screen_height}")
         
         # Create four frames
         self.frame1 = tk.Frame(root, bg="lightblue", bd=2, relief=tk.RIDGE)
@@ -126,7 +217,7 @@ class StudentManagementSystem:
         
         # Labels and Entry widgets for Contact Information
         ttk.Label(self.frame1, text="Phone Number:",background="lightblue" ,font=("Arial", 10 , "bold")).place(x=300, y=40)
-        self.phone_number_entry = ttk.Entry(self.frame1)
+        self.phone_number_entry = ttk.Entry(self.frame1,font=("Arial", 10))
         self.phone_number_entry.place(x=420, y=40)
 
         ttk.Label(self.frame1, text="E-mail:",background="lightblue" ,font=("Arial", 10 , "bold")).place(x=300, y=70)
@@ -136,6 +227,7 @@ class StudentManagementSystem:
         ttk.Label(self.frame1, text="Address:",background="lightblue" ,font=("Arial", 10 , "bold")).place(x=300, y=100)
         self.address_entry = ttk.Entry(self.frame1 ,font=("Arial", 10))
         self.address_entry.place(x=420, y=100)
+
 
     def create_personal_information_section(self):
         # Label for Personal Information
@@ -151,7 +243,7 @@ class StudentManagementSystem:
         self.mother_name_entry.place(x=130, y=340)
 
         ttk.Label(self.frame1, text="Skills:",background="lightblue" ,font=("Arial", 10 , "bold")).place(x=10, y=370)
-        self.skills_combobox = ttk.Combobox(self.frame1, values=["Programming", "Design", "Communication"] ,font=("Arial", 10))
+        self.skills_combobox = ttk.Combobox(self.frame1, values=["Programming", "Design", "Communication","Video Editing","Playing Musical Instruments","know Do Presentation"] ,font=("Arial", 10))
         self.skills_combobox.place(x=130, y=370)
 
     def create_qualification_section(self):
@@ -212,55 +304,55 @@ class StudentManagementSystem:
 
     def create_happiest_moment_section(self):
         # Label for Happiest Moment
-        ttk.Label(self.frame4, text="|| Happiest Moment ||", font=("Arial", 14, "bold"),background="lightcoral").place(x=90, y=10)
+        ttk.Label(self.frame4, text="Happiest Moment", font=("Arial", 14, "bold"),background="lightcoral").place(x=90, y=10)
         
         # Textbox for Happiest Moment
         ttk.Label(self.frame4, text="Describe your happiest moment:", font=("Arial", 10, "bold"),background="lightcoral").place(x=70, y=40)
         self.happiest_moment_text_area = tk.Text(self.frame4, height=5, width=40 ,font=("Arial", 10))
-        self.happiest_moment_text_area.place(x=10, y=70)
+        self.happiest_moment_text_area.place(x=30, y=70)
 
     def create_future_plan_section(self):
         # Label for Future Plan
-        ttk.Label(self.frame4, text="|| Future Plan ||", font=("Arial", 14, "bold"),background="lightcoral").place(x=120, y=170)
+        ttk.Label(self.frame4, text="Future Plan", font=("Arial", 14, "bold"),background="lightcoral").place(x=120, y=170)
         
         # Textbox for Future Plan
         ttk.Label(self.frame4, text="Describe your future plan:", font=("Arial", 10, "bold"),background="lightcoral").place(x=90, y=200)
         self.future_plan_text_area = tk.Text(self.frame4, height=5, width=40 ,font=("Arial", 10))
-        self.future_plan_text_area.place(x=10, y=230)
+        self.future_plan_text_area.place(x=30, y=230)
 
     def create_suggestion_section(self):
         # Label for Suggestion
-        ttk.Label(self.frame4, text="|| Suggestions ||", font=("Arial", 14, "bold"),background="lightcoral").place(x=500, y=10)
+        ttk.Label(self.frame4, text="Suggestions", font=("Arial", 14, "bold"),background="lightcoral").place(x=500, y=10)
         
         # Textbox for Suggestion
         ttk.Label(self.frame4, text="Any suggestions:", font=("Arial", 10, "bold"),background="lightcoral").place(x=505, y=40)
         self.suggestion_text_area = tk.Text(self.frame4, height=5, width=40 ,font=("Arial", 10))
-        self.suggestion_text_area.place(x=400, y=70)
+        self.suggestion_text_area.place(x=420, y=70)
 
     def create_expectation_section(self):
         # Label for Expectation
-        ttk.Label(self.frame4, text="|| Expectation ||", font=("Arial", 14, "bold"),background="lightcoral").place(x=505, y=170)
+        ttk.Label(self.frame4, text="Expectation", font=("Arial", 14, "bold"),background="lightcoral").place(x=505, y=170)
         
         # Textbox for Expectation
         ttk.Label(self.frame4, text="Describe your expectation:", font=("Arial", 10, "bold"),background="lightcoral").place(x=480, y=200)
         self.expectation_text_area = tk.Text(self.frame4, height=5, width=40 ,font=("Arial", 10))
-        self.expectation_text_area.place(x=400, y=230)
+        self.expectation_text_area.place(x=420, y=230)
     
     def create_how_do_get_know_about_us_section(self):
         # Label for About Us
-        ttk.Label(self.frame4, text="|| How did you hear about us? ||", font=("Arial", 14, "bold"),background="lightcoral").place(x=250, y=330)
+        ttk.Label(self.frame4, text="How did you hear about us?", font=("Arial", 14, "bold"),background="lightcoral").place(x=250, y=330)
 
         # Dropdown Box for About Us
         about_us_values = ["Word of Mouth", "Online Search", "Social Media", "Event", "Newspaper", "Other"]
         self.about_us_dropdown = ttk.Combobox(self.frame4, values=about_us_values, width=30,height=10 ,font=("Arial", 10))
-        self.about_us_dropdown.place(x=280, y=360)
+        self.about_us_dropdown.place(x=270, y=360)
     
     def create_treeview_section(self):
         # Label For Student Records(Treeview in Frame 2)
         ttk.Label(self.frame2, text="Students Records", font=("Arial", 14, "bold"), background="lightgreen").place(x=300, y=10)
 
         # Create Treeview widget
-        self.treeview = ttk.Treeview(self.frame2, columns=("ID", "Name", "Sex", "Age", "Joining Date", "Faculty Name", "Course Name", "Teacher Name"), show="headings")
+        self.treeview = ttk.Treeview(self.frame2, columns=("ID", "Name", "Sex", "Age", "Joining Date", "Faculty Name", "Course Name", "Teacher Name","Phone Number"), show="headings")
         self.treeview.place(x=10, y=50, width=720, height=340)
 
         # Create style for column headings
@@ -276,16 +368,18 @@ class StudentManagementSystem:
         self.treeview.heading("Faculty Name", text="Faculty Name", anchor=tk.CENTER, command=lambda: self.sort_column(self.treeview, "Faculty Name", False))
         self.treeview.heading("Course Name", text="Course Name", anchor=tk.CENTER, command=lambda: self.sort_column(self.treeview, "Course Name", False))
         self.treeview.heading("Teacher Name", text="Teacher Name", anchor=tk.CENTER, command=lambda: self.sort_column(self.treeview, "Teacher Name", False))
+        self.treeview.heading("Phone Number", text="Phone Number", anchor=tk.CENTER, command=lambda: self.sort_column(self.treeview, "Phone Number", False))
 
         # Adjust column widths
         self.treeview.column("ID", width=80)  # Adjust width for ID column
         self.treeview.column("Name", width=200)  # Adjust width for Name column
         self.treeview.column("Sex", width=80)  # Adjust width for Sex column
-        self.treeview.column("Age", width=80)  # Adjust width for Age column
+        self.treeview.column("Age", width=50)  # Adjust width for Age column
         self.treeview.column("Joining Date", width=120)  # Adjust width for Joining Date column
         self.treeview.column("Faculty Name", width=120)  # Adjust width for Faculty Name column
         self.treeview.column("Course Name", width=100)  # Adjust width for Course Name column
         self.treeview.column("Teacher Name", width=100)  # Adjust width for Teacher Name column
+        self.treeview.column("Phone Number", width=120)  # Adjust width for Phone Number column
 
         # Add scrollbars
         x_scrollbar = ttk.Scrollbar(self.frame2, orient="horizontal", command=self.treeview.xview)
@@ -301,6 +395,13 @@ class StudentManagementSystem:
 
         # Apply the style to all cells
         self.treeview.tag_configure("student_style", font=("Arial", 12, "bold"), anchor=tk.CENTER)
+        
+    def sort_column(self, treeview, col, reverse):
+        data = [(treeview.set(child, col), child) for child in treeview.get_children('')]
+        data.sort(reverse=reverse)
+        for index, (val, child) in enumerate(data):
+            treeview.move(child, '', index)
+        treeview.heading(col, command=lambda: self.sort_column(treeview, col, not reverse))
 
     def refresh_students(self):
         # Clear existing data in the TreeView
@@ -346,9 +447,9 @@ class StudentManagementSystem:
         # Create a custom style for the buttons
         style = ttk.Style()
         style.configure("TButton", font=button_font)
+
         # Calculate Button
         ttk.Button(self.frame1, text="Calculate",command=self.calculate_balance).place(x=430, y=350, width=100, height=30)
-        
 
         # Save Button
         ttk.Button(self.frame1, text="Save",command=self.save_data).place(x=650, y=60, width=100, height=30)
@@ -371,6 +472,8 @@ class StudentManagementSystem:
         # Clear Button
         ttk.Button(self.frame1, text="Exit",command=self.exit_application).place(x=650, y=300, width=100, height=30)
 
+        # Create Excel Button
+        ttk.Button(self.frame1, text="Excel File", command=self.export_to_excel).place(x=650, y=340, width=100, height=30)
 
     def calculate_balance(self):
         try:
@@ -388,6 +491,21 @@ class StudentManagementSystem:
                 messagebox.showerror("Error", "Please enter valid numeric values for Total Fee and Paid Fee.")
             return False
         
+    def check_student_id_exists(self, student_id):
+        # Connect to the database
+        conn = sqlite3.connect('Students_Records_DB_File.db')
+        cursor = conn.cursor()
+
+        # Query the database to check if the student ID exists
+        cursor.execute("SELECT COUNT(*) FROM students WHERE id = ?", (student_id,))
+        count = cursor.fetchone()[0]
+
+        # Close the database connection
+        conn.close()
+
+        # Return True if the student ID exists, False otherwise
+        return count > 0 
+      
     def save_data(self):
         # Get the student ID from the entry field
         student_id = self.id_entry.get()
@@ -400,6 +518,7 @@ class StudentManagementSystem:
         if not student_id:
             messagebox.showerror("Error", "Please enter a student ID to SAVE!")
             return
+            
         elif not student_name:
             messagebox.showerror("Error", "Please enter a student name to SAVE!")
             return
@@ -412,6 +531,13 @@ class StudentManagementSystem:
         elif not student_phone_number:
             messagebox.showerror("Error", "Please enter a phone number to SAVE!")
             return
+        
+        # Check if student ID is already in use
+        if self.check_student_id_exists(student_id):
+            """Code for  student_id_exists up"""
+            messagebox.showerror("Error", f"Student ID '{student_id}' is already in use. Please enter a different student ID.")
+            return
+        
 
     # If all fields are provided, proceed with saving the data
         # Get data from all entry fields and text areas
@@ -455,13 +581,12 @@ class StudentManagementSystem:
         if confirm_save:
             # Save data to the database
             self.save_to_database(data)
+
             
             messagebox.showinfo("Info", "Data saved successfully.")
         else:
             messagebox.showinfo("Info", "Data not saved.")
 
-        # Save data to the database
-        self.save_to_database(data)
 
         #Add New Student Data Inside Treeview Widget
         self.refresh_students()
@@ -918,6 +1043,42 @@ class StudentManagementSystem:
         finally:
             # Close the connection
             conn.close()
+    
+    def export_to_excel(self):
+        # Prompt the user to select the location to save the Excel file
+        file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")])
+        
+        if file_path:
+            # Retrieve all student data from the database
+            student_data = self.retrieve_all_students()
+            
+            # Create a new Excel workbook
+            wb = Workbook()
+            ws = wb.active
+            
+            # Write the header row
+            ws.append(["ID", "Name", "Sex", "Age", "Joining Date", "Faculty Name", "Course Name", "Teacher Name", "Phone Number", "Email", "Address", "Father's Name", "Mother's Name", "Skills", "Qualification", "Total Fee", "Paid", "Balance", "Positive Point 1", "Positive Point 2", "Positive Point 3", "Positive Point 4", "Negative Point 1", "Negative Point 2", "Negative Point 3", "Negative Point 4", "Future Plan", "Happiest Moment", "Suggestions", "Expectations", "How Did You Hear About Us"])
+            
+            # Write student data to the worksheet
+            for student in student_data:
+                ws.append(student)
+            
+            # Save the workbook
+            wb.save(file_path)
+            
+            # Inform the user that the data has been exported successfully
+            messagebox.showinfo("Export to Excel", "Data exported to Excel successfully!")
+            
+            # Get the path to the desktop directory
+            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+            
+            # Copy the exported Excel file to the desktop
+            shutil.copy(file_path, desktop_path)
+            
+            # Inform the user that the file has been copied to the desktop
+            messagebox.showinfo("Copy to Desktop", f"The Excel file has been copied to the desktop: {desktop_path}")
+
+
 
 
     def exit_application(self):
@@ -927,8 +1088,13 @@ class StudentManagementSystem:
         if confirm_exit:
             # Destroy the main window to exit the application
             self.root.destroy()
+        
+# Main function to start the application
+def main():
+    # Create a login panel window
+    login_root = tk.Tk()
+    login_app = LoginPanel(login_root)
+    login_root.mainloop()
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = StudentManagementSystem(root)
-    root.mainloop()
+    main()
