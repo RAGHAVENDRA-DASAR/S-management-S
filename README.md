@@ -55,13 +55,5 @@ This Student Records Management System is a Python application designed to manag
 
 ## Contributing
 Contributions are welcome! Feel free to open issues, submit pull requests, or provide feedback.
+.
 
-## License
-This project is licensed under the [MIT License](LICENSE).
-
-## Acknowledgments
-- Special thanks to [OpenAI](https://www.openai.com/) for providing the GPT-3 model used to generate this README template.
-- Any additional acknowledgments or credits can be added here.
-```
-
-Make sure to update the README with accurate information and details relevant to your application. Additionally, include a license file (e.g., `LICENSE`) if you haven't already.
