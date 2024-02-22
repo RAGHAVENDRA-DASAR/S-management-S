@@ -17,7 +17,6 @@ This Student Records Management System is a Python application designed to manag
    - Install the required dependencies using the following command:
      ```
      pip install openpyxl
-     pip install shutil
      pip install sqlite3
      ```
 
