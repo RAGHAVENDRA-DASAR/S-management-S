@@ -58,7 +58,6 @@ class LoginPanel:
         self.btn_cancel.pack(side=tk.LEFT, padx=5, ipadx=20, ipady=10)
 
     def login(self):
-        # Hardcoded credentials for demonstration
         username = self.entry_username.get()
         password = self.entry_password.get()
 
@@ -226,7 +225,7 @@ class StudentManagementSystem:
 
         ttk.Label(self.frame1, text="Address:",background="lightblue" ,font=("Arial", 10 , "bold")).place(x=300, y=100)
         self.address_entry = ttk.Entry(self.frame1 ,font=("Arial", 10))
-        self.address_entry.place(x=420, y=100)
+        self.address_entry.place(x=420, y=100,height=30)
 
 
     def create_personal_information_section(self):
@@ -717,7 +716,9 @@ class StudentManagementSystem:
         self.qualification_combobox.set('')
         self.total_fee_entry.delete(0, tk.END)
         self.paid_entry.delete(0, tk.END)
+        self.balance_entry.configure(state='normal')
         self.balance_entry.delete(0, tk.END)
+        self.balance_entry.configure(state='readonly')
 
         # Clear text areas
         self.point1_text_area.delete(1.0, tk.END)
@@ -823,8 +824,10 @@ class StudentManagementSystem:
             self.total_fee_entry.insert(0, total_fee)
             self.paid_entry.delete(0, tk.END)
             self.paid_entry.insert(0, paid)
+            self.balance_entry.configure(state='normal')
             self.balance_entry.delete(0, tk.END)
-            self.balance_entry.insert(0, balance)
+            self.balance_entry.insert(0, f"{balance}")
+            self.balance_entry.configure(state='readonly')
             
             #all Text box 
             self.point1_text_area.delete("1.0", tk.END)
