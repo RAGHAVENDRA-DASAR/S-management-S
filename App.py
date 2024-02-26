@@ -413,9 +413,33 @@ class StudentManagementSystem:
         # Insert the retrieved student data into the TreeView
         for student in student_data:
             self.treeview.insert('', 'end', values=student, tags=("student_style",))
-        
-        
+            
+        # Get the selected faculty name from the combobox
+        faculty_name = self.faculty_name_combobox.get()
 
+        if faculty_name =="Livewire":
+            # Clear existing data in the TreeView
+            for row in self.treeview.get_children():
+                self.treeview.delete(row)
+            # Filter student data for Livewire faculty
+            livewire_students = [student for student in student_data if student[5] == "Livewire"]
+
+            # Insert the filtered student data into the TreeView
+            for student in livewire_students:
+                self.treeview.insert('', 'end', values=student, tags=("student_style",))
+        
+        if faculty_name == "Cadd Center":
+            # Clear existing data in the TreeView
+            for row in self.treeview.get_children():
+                self.treeview.delete(row)
+
+            # Filter student data for Cadd Center faculty
+            cadd_center_students = [student for student in student_data if student[5] == "Cadd Center"]
+
+            # Insert the filtered student data into the TreeView
+            for student in cadd_center_students:
+                self.treeview.insert('', 'end', values=student, tags=("student_style",))
+                
     def retrieve_all_students(self):
         # Get the current script directory
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -438,7 +462,7 @@ class StudentManagementSystem:
 
         return student_data
 
-
+    #Create Button Section 
     def create_buttons(self):
         #deefine the font for the buttons
         button_font = ("Arial", 10, "bold")  
@@ -504,7 +528,7 @@ class StudentManagementSystem:
 
         # Return True if the student ID exists, False otherwise
         return count > 0 
-      
+
     def save_data(self):
         # Get the student ID from the entry field
         student_id = self.id_entry.get()
@@ -537,6 +561,10 @@ class StudentManagementSystem:
             messagebox.showerror("Error", f"Student ID '{student_id}' is already in use. Please enter a different student ID.")
             return
         
+        # Check if student phone number is 10 digits
+        if len(student_phone_number) != 10 or not student_phone_number.isdigit():
+            messagebox.showerror("Error", "Please enter a valid 10-digit phone number.")
+            return
 
     # If all fields are provided, proceed with saving the data
         # Get data from all entry fields and text areas
@@ -658,7 +686,7 @@ class StudentManagementSystem:
             # Show success message
             messagebox.showinfo("Success", "Data saved successfully!")
 
-        except Exception as e:
+        except sqlite3.Error as e:
             # Handle any exceptions (e.g., database errors)
             messagebox.showerror("Error", f"Failed to save data. Error: {str(e)}")
 
@@ -899,71 +927,7 @@ class StudentManagementSystem:
         # Return the student data
         return student_data
     
-    def edit_student(self):
-        # Get the student ID from the entry field
-        student_id = self.id_entry.get()
-
-        # Check if the ID is provided
-        if not student_id:
-            messagebox.showerror("Error", "Please enter a student ID to edit.")
-            return
-
-        # Get the data from the database for the provided ID
-        student_data = self.get_student_data(student_id)
-
-        # Check if the student with the provided ID exists
-        if student_data:
-            # Ask for confirmation
-            confirmation = messagebox.askquestion("Confirmation", "Are you sure you want to edit student information?", icon='warning')
-
-            if confirmation == 'yes':
-                # Update the student's data in the database
-                updated_data = {
-                    'name': self.name_entry.get(),
-                    'sex': self.sex_combobox.get(),
-                    'age' : self.age_entry.get(),
-                    'joining_date': self.joining_date_entry.get_date(),
-                    'faculty_name': self.faculty_name_combobox.get(),
-                    'course_name': self.course_name_entry.get(),
-                    'teacher_name': self.teacher_name_entry.get(),
-                    'phone_number': self.phone_number_entry.get(),
-                    'email': self.email_entry.get(),
-                    'address': self.address_entry.get(),
-                    'father_name': self.father_name_entry.get(),
-                    'mother_name': self.mother_name_entry.get(),
-                    'skills': self.skills_combobox.get(),
-                    'qualification': self.qualification_combobox.get(),
-                    'total_fee': self.total_fee_entry.get(),
-                    'paid': self.paid_entry.get(),
-                    'balance' : self.balance_entry.get(),
-                    'positive_point1': self.point1_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'positive_point2': self.point2_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'positive_point3': self.point3_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'positive_point4': self.point4_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'negative_point1': self.neg_point1_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'negative_point2': self.neg_point2_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'negative_point3': self.neg_point3_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'negative_point4': self.neg_point4_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'future_plan': self.future_plan_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'happiest_moment': self.happiest_moment_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'suggestions': self.suggestion_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'expectations': self.expectation_text_area.get("1.0", tk.END).strip() or "No DATA",
-                    'how_know_about_us': self.about_us_dropdown.get() or "No DATA"
-                }
- 
-                # Update data in the database
-                self.update_student_data(student_id, updated_data)
-
-                messagebox.showinfo("Info", f"Student data updated successfully.")
-
-            else:
-                messagebox.showinfo("Info", "Student information not edited.")
-
-        else:
-            messagebox.showinfo("Info", f"No student found with ID: {student_id}")
-
-        #Add Edit Student Data Inside Treeview Widget
-        self.refresh_students()
+    
 
     def update_student_data(self):
         # Get the student ID from the entry field
@@ -973,7 +937,12 @@ class StudentManagementSystem:
         if not student_id:
             messagebox.showerror("Error", "Please enter a student ID to update.")
             return
-
+        # Check if student phone number is 10 digits
+        student_phone_number = self.phone_number_entry.get()
+        if len(student_phone_number) != 10 or not student_phone_number.isdigit():
+            messagebox.showerror("Error", "Please enter a valid 10-digit phone number.")
+            return
+        
         # Get the student data from the entry fields and text areas
         data = {
             'name': self.name_entry.get(),
@@ -1018,12 +987,11 @@ class StudentManagementSystem:
         self.refresh_students()
 
     def update_student_in_database(self, student_id, data):
-        # Connect to the database
         conn = sqlite3.connect('Students_Records_DB_File.db')
         cursor = conn.cursor()
 
         try:
-            # Update the student data in the database
+            # Update the student data in the database using a parameterized query
             cursor.execute('''
                 UPDATE students SET
                 name=?, sex=?, age=?, joining_date=?, faculty_name=?, course_name=?, teacher_name=?,
@@ -1035,51 +1003,37 @@ class StudentManagementSystem:
                 WHERE id=?
             ''', (*data.values(), student_id))
 
-            # Commit the changes
             conn.commit()
 
-            # Show success message
             messagebox.showinfo("Success", "Student information updated successfully!")
-        except Exception as e:
-            # Show error message if update fails
+        except sqlite3.Error as e:
             messagebox.showerror("Error", f"Failed to update student data. Error: {str(e)}")
         finally:
-            # Close the connection
             conn.close()
-    
+
     def export_to_excel(self):
-        # Prompt the user to select the location to save the Excel file
         file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")])
         
         if file_path:
-            # Retrieve all student data from the database
-            student_data = self.retrieve_all_students()
-            
-            # Create a new Excel workbook
-            wb = Workbook()
-            ws = wb.active
-            
-            # Write the header row
-            ws.append(["ID", "Name", "Sex", "Age", "Joining Date", "Faculty Name", "Course Name", "Teacher Name", "Phone Number", "Email", "Address", "Father's Name", "Mother's Name", "Skills", "Qualification", "Total Fee", "Paid", "Balance", "Positive Point 1", "Positive Point 2", "Positive Point 3", "Positive Point 4", "Negative Point 1", "Negative Point 2", "Negative Point 3", "Negative Point 4", "Future Plan", "Happiest Moment", "Suggestions", "Expectations", "How Did You Hear About Us"])
-            
-            # Write student data to the worksheet
-            for student in student_data:
-                ws.append(student)
-            
-            # Save the workbook
-            wb.save(file_path)
-            
-            # Inform the user that the data has been exported successfully
-            messagebox.showinfo("Export to Excel", "Data exported to Excel successfully!")
-            
-            # Get the path to the desktop directory
-            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-            
-            # Copy the exported Excel file to the desktop
-            shutil.copy(file_path, desktop_path)
-            
-            # Inform the user that the file has been copied to the desktop
-            messagebox.showinfo("Copy to Desktop", f"The Excel file has been copied to the desktop: {desktop_path}")
+            try:
+                wb = Workbook()
+                ws = wb.active
+                ws.append(["ID", "Name", "Sex", "Age", "Joining Date", "Faculty Name", "Course Name", "Teacher Name", "Phone Number", "Email", "Address", "Father's Name", "Mother's Name", "Skills", "Qualification", "Total Fee", "Paid", "Balance", "Positive Point 1", "Positive Point 2", "Positive Point 3", "Positive Point 4", "Negative Point 1", "Negative Point 2", "Negative Point 3", "Negative Point 4", "Future Plan", "Happiest Moment", "Suggestions", "Expectations", "How Did You Hear About Us"])
+
+                student_data = self.retrieve_all_students()
+                for student in student_data:
+                    ws.append(student)
+
+                wb.save(file_path)
+
+                messagebox.showinfo("Export to Excel", "Data exported to Excel successfully!")
+
+                desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+                shutil.copy(file_path, desktop_path)
+
+                messagebox.showinfo("Copy to Desktop", f"The Excel file has been copied to the desktop: {desktop_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to export data to Excel. Error: {str(e)}")
 
 
 
